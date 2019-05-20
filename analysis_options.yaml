@@ -22,9 +22,8 @@ linter:
     - always_require_non_null_named_parameters
     - always_specify_types
     - annotate_overrides
-    # Conflicts with always_specify_types.
-    # - avoid_annotating_with_dynamic
-    # Conflicts with implicit-casts.
+    - avoid_annotating_with_dynamic
+    # Prefer as to retype or cast.
     # - avoid_as
     - avoid_bool_literals_in_conditional_expressions
     - avoid_catches_without_on_clauses
@@ -44,13 +43,11 @@ linter:
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
     - avoid_returning_null
-    # Not supported in VS Code.
-    # - avoid_returning_null_for_future
+    - avoid_returning_null_for_future
     - avoid_returning_null_for_void
     - avoid_returning_this
     - avoid_setters_without_getters
-    # Not supported in VS Code.
-    # - avoid_shadowing_type_parameters
+    - avoid_shadowing_type_parameters
     - avoid_single_cascade_in_expression_statements
     - avoid_slow_async_io
     - avoid_types_as_parameter_names
@@ -67,6 +64,7 @@ linter:
     - constant_identifier_names
     - control_flow_in_finally
     - curly_braces_in_flow_control_structures
+    - diagnostic_describe_all_properties
     - directives_ordering
     - empty_catches
     - empty_constructor_bodies
@@ -83,16 +81,15 @@ linter:
     - lines_longer_than_80_chars
     - list_remove_unrelated_type
     - literal_only_boolean_expressions
-    # Conflicts with prefer_adjacent_string_concatenation.
-    # - no_adjacent_strings_in_list
+    - no_adjacent_strings_in_list
     - no_duplicate_case_values
     - non_constant_identifier_names
     - null_closures
-    # Ignored in favour of static typing.
+    # Conflicts with always_specify_types.
     # - omit_local_variable_types
     - one_member_abstracts
     - only_throw_errors
-    # Conflicts with annotate_overrides.
+    # Override fields if necessary.
     # - overridden_fields
     - package_api_docs
     - package_names
@@ -100,6 +97,7 @@ linter:
     - parameter_assignments
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
+    # - prefer_asserts_with_message
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_const_constructors
@@ -108,42 +106,48 @@ linter:
     - prefer_const_literals_to_create_immutables
     - prefer_constructors_over_static_methods
     - prefer_contains
+    # Not supported in VSCode.
+    # - prefer_double_quotes
     - prefer_equal_for_default_values
-    - prefer_expression_function_bodies
+    # Conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-braces-for-long-functions-and-methods.
+    # - prefer_expression_function_bodies
     - prefer_final_fields
-    # Not supported in VS Code.
-    # - prefer_final_in_for_each
+    - prefer_final_in_for_each
     - prefer_final_locals
-    # Use for loops where possible.
-    # - prefer_foreach
+    - prefer_for_elements_to_map_fromIterable
+    - prefer_foreach
     - prefer_function_declarations_over_variables
     - prefer_generic_function_type_aliases
+    - prefer_if_elements_to_conditional_expressions
     - prefer_initializing_formals
+    - prefer_inlined_adds
     - prefer_int_literals
     - prefer_interpolation_to_compose_strings
     - prefer_is_empty
     - prefer_is_not_empty
     - prefer_iterable_whereType
     - prefer_mixin
+    - prefer_null_aware_operators
     - prefer_single_quotes
+    - prefer_spread_collections
     - prefer_typing_uninitialized_variables
     - prefer_void_to_null
-    # Most things are not publicly accessible so not required.
-    # - public_member_api_docs
+    - provide_deprecation_message
+    - public_member_api_docs
     - recursive_getters
     - slash_for_doc_comments
-    # Class arguments should be defined above the constructor.
+    # Not supported in VSCode.
+    # - sort_child_properties_last
+    # Contructor paramaters should go before constructors.
     # - sort_constructors_first
     - sort_pub_dependencies
     - sort_unnamed_constructors_first
-    - super_goes_last
     - test_types_in_equals
     - throw_in_finally
     - type_annotate_public_apis
     - type_init_formals
     - unawaited_futures
-    # Not supported in VS Code.
-    # - unnecessary_await_in_return
+    - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
     - unnecessary_const
     - unnecessary_getters_setters
@@ -156,8 +160,8 @@ linter:
     - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
-    # Not supported in VS Code.
-    # - use_function_type_syntax_for_parameters
+    - use_full_hex_values_for_flutter_colors
+    - use_function_type_syntax_for_parameters
     - use_rethrow_when_possible
     - use_setters_to_change_properties
     - use_string_buffers

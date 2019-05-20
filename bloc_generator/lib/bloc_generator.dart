@@ -17,5 +17,5 @@ import 'package:source_gen/source_gen.dart';
 
 import 'package:bloc_generator/src/bloc.dart';
 
-Builder bloc(BuilderOptions options) =>
+Builder bloc(final BuilderOptions options) =>
     PartBuilder(<Generator>[BLoCGenerator(options)], '.bloc.dart');

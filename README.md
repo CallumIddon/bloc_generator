@@ -1,6 +1,6 @@
 # bloc_generator
 
-![Build Status](https://img.shields.io/badge/Ci-passing-success.svg)
+[![Build Status](https://api.cirrus-ci.com/github/CallumIddon/bloc_generator.svg)](https://cirrus-ci.com/github/CallumIddon/bloc_generator)
 
 bloc_generator is a combination of three packages.
 

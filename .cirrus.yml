@@ -19,7 +19,6 @@ task:
     image: cirrusci/flutter:1.0.0
 
   script: flutter doctor
-
 task:
   name: publish
   only_if: $CIRRUS_BRANCH == "master"

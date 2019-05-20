@@ -20,7 +20,7 @@ import 'package:flutter_bloc_example/bloc.dart';
 
 class SetService extends InputService<int> {
   @override
-  Future<void> init(Sink<int> sink) async {
+  Future<void> init(final Sink<int> sink) async {
     await Future<void>.delayed(Duration(seconds: 5));
     sink.add(10);
   }
@@ -28,7 +28,7 @@ class SetService extends InputService<int> {
 
 class PrintService extends OutputService<String> {
   @override
-  void listen(String inputData) {
+  void listen(final String inputData) {
     print('Counter set to: $inputData');
   }
 }
@@ -37,7 +37,7 @@ class MaxService extends BLoCService<TestBLoC> {
   StreamSubscription<String> _counterSub;
 
   @override
-  void init(TestBLoC bloc) {
+  void init(final TestBLoC bloc) {
     _counterSub = bloc.counter.listen((String counter) {
       if (int.parse(counter) >= bloc.maxValue) {
         print('Looks like you hit ${bloc.maxValue}\n'
@@ -55,14 +55,14 @@ class MaxService extends BLoCService<TestBLoC> {
 
 class UrlService extends TriggerService<TestBLoC> {
   @override
-  Future<void> trigger(TestBLoC bloc) async {
+  Future<void> trigger(final TestBLoC bloc) async {
     print('https://github.com/CallumIddon/bloc_generator');
   }
 }
 
 class StringifyMapper extends MapperService<int, String> {
   @override
-  Stream<String> map(int inputData) async* {
+  Stream<String> map(final int inputData) async* {
     yield inputData.toString();
   }
 }

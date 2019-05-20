@@ -2,7 +2,7 @@ name: flutter_bloc_provider
 description: >
     Flutter provider and disposer widgets for generated BLoC classes from
     bloc_generator.
-version: 0.5.0
+version: 0.5.1
 author: Callum Iddon <iddoncallum@gmail.com>
 homepage: https://github.com/CallumIddon/bloc_generator
 
@@ -13,4 +13,4 @@ dependencies:
   flutter:
     sdk: flutter
 
-  bloc_annotations: 0.5.0
+  bloc_annotations: ^0.5.1

@@ -47,7 +47,7 @@ class _Test extends BLoCTemplate {
   String currentCounter;
 
   @BLoCMapper('addToCounter', 'counter')
-  Stream<String> setAddToCounterBLoC(int inputData) async* {
+  Stream<String> setAddToCounterBLoC(final int inputData) async* {
     yield (int.parse(currentCounter) + inputData).toString();
   }
 }

@@ -44,6 +44,41 @@ class _BLoCDisposerState<BLoCT extends BLoCTemplate>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BLoCProvider<BLoCT>(child: widget.child, bloc: widget.bloc);
+  Widget build(final BuildContext context) {
+    return BLoCProvider<BLoCT>(
+      child: widget.child,
+      bloc: widget.bloc,
+    );
+  }
+}
+
+class BLoCMultiDisposer extends StatefulWidget {
+  final Widget child;
+
+  final List<BLoCTemplate> blocs;
+
+  const BLoCMultiDisposer({@required this.child, @required this.blocs})
+      : assert(child != null),
+        assert(blocs != null);
+
+  @override
+  _BLoCMultiDisposerState createState() => _BLoCMultiDisposerState();
+}
+
+class _BLoCMultiDisposerState extends State<BLoCMultiDisposer> {
+  @override
+  void dispose() {
+    super.dispose();
+    for (final BLoCTemplate bloc in widget.blocs) {
+      bloc.dispose();
+    }
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    return BLoCMultiProvider(
+      child: widget.child,
+      blocs: widget.blocs,
+    );
+  }
 }

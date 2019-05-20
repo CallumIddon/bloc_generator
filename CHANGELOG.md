@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1
+
+* Add BLoCMultiProvider and BLoCMultiDisposer
+
 ## 0.5.0
 
 * Add Documentation

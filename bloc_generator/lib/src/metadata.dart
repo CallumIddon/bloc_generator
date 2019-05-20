@@ -16,7 +16,7 @@ import 'package:analyzer/dart/element/element.dart';
 
 bool findMetadata(Element element, String metadataName) {
   bool foundMetadata = false;
-  for (ElementAnnotation metadata in element.metadata) {
+  for (final ElementAnnotation metadata in element.metadata) {
     if (metadata.toSource().startsWith(metadataName)) {
       foundMetadata = true;
       break;
@@ -30,7 +30,7 @@ List<ElementAnnotation> getMetadata(Element element, String metadataName) {
     throw Exception('$element does not have a $metadataName');
   }
   final List<ElementAnnotation> foundMetadata = <ElementAnnotation>[];
-  for (ElementAnnotation metadata in element.metadata) {
+  for (final ElementAnnotation metadata in element.metadata) {
     if (metadata.toSource().startsWith(metadataName)) {
       foundMetadata.add(metadata);
     }

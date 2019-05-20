@@ -22,14 +22,18 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(final BuildContext context) {
+    return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: BLoCDisposer<TestBLoC>(
-          bloc: TestBLoC(maxValue: 20),
-          child: const MyHomePage(title: 'Flutter Demo Home Page')));
+        bloc: TestBLoC(maxValue: 20),
+        child: const MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
+    );
+  }
 }
 
 class MyHomePage extends StatelessWidget {
@@ -38,44 +42,53 @@ class MyHomePage extends StatelessWidget {
   const MyHomePage({this.title});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TestBLoC bloc = BLoCProvider.of<TestBLoC>(context);
     return Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: Center(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-              const Text('You have pushed the button this many times:'),
-              StreamBuilder<String>(
-                  stream: bloc.counter,
-                  builder:
-                      (BuildContext context, AsyncSnapshot<String> snapshot) {
-                    if (!snapshot.hasData) {
-                      return Container();
-                    }
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('You have pushed the button this many times:'),
+            StreamBuilder<String>(
+              stream: bloc.counter,
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                if (!snapshot.hasData) {
+                  return Container();
+                }
 
-                    return Column(children: <Widget>[
-                      Text(snapshot.data,
-                          style: Theme.of(context).textTheme.display1),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            MaterialButton(
-                                child: const Text('Reset Counter'),
-                                onPressed: () => bloc.setCounter.add(0)),
-                            MaterialButton(
-                                child: const Text('Trigger Url Service'),
-                                onPressed: bloc.triggerUrlService)
-                          ])
-                    ]);
-                  }),
-            ])),
-        floatingActionButton: FloatingActionButton(
-            onPressed: () => bloc.addToCounter.add(1),
-            tooltip: 'Increment',
-            child: const Icon(Icons.add)));
+                return Column(children: <Widget>[
+                  Text(
+                    snapshot.data,
+                    style: Theme.of(context).textTheme.display1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      MaterialButton(
+                        child: const Text('Reset Counter'),
+                        onPressed: () => bloc.setCounter.add(0),
+                      ),
+                      MaterialButton(
+                        child: const Text('Trigger Url Service'),
+                        onPressed: bloc.triggerUrlService,
+                      ),
+                    ],
+                  ),
+                ]);
+              },
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => bloc.addToCounter.add(1),
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+    );
   }
 }

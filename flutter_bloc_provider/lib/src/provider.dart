@@ -36,21 +36,69 @@ class BLoCProvider<BLoCT extends BLoCTemplate> extends InheritedWidget {
 
   /// Retrieve a [bloc] from a [context] that is below the [child] of the
   /// BLoCProvider<BLoCT> that made the [bloc] accessible to the widget tree.
-  static BLoCT of<BLoCT extends BLoCTemplate>(BuildContext context) {
+  static BLoCT of<BLoCT extends BLoCTemplate>(final BuildContext context) {
     final Type providerType = _type<BLoCProvider<BLoCT>>();
-    final BLoCProvider<BLoCT> provider = context
-        .inheritFromWidgetOfExactType(providerType) as BLoCProvider<BLoCT>;
+    // context.inheritFromWidgetOfExactType() works through finding the static
+    // type not the runtime type, this means that it won't find
+    // BLoCMultiProviders as the type is not specified at conpile time.
+    BLoCT bloc = (context.inheritFromWidgetOfExactType(providerType)
+            as BLoCProvider<BLoCT>)
+        ?.bloc;
 
-    if (provider == null) {
+    if (bloc != null) {
+      return bloc;
+    }
+
+    context.visitAncestorElements((final Element element) {
+      if (element.widget.runtimeType == providerType) {
+        bloc = (element.widget as BLoCProvider<BLoCT>).bloc;
+        return false;
+      } else if (element.widget.runtimeType == BLoCMultiProvider) {
+        final BLoCMultiProvider provider = element.widget as BLoCMultiProvider;
+        final Iterable<BLoCT> providerBLoCs = provider.blocs.whereType<BLoCT>();
+        if (providerBLoCs.length == 1) {
+          bloc = providerBLoCs.toList()[0];
+          return false;
+        } else if (providerBLoCs.length > 1) {
+          throw FlutterError('Found multiple BLoCs of type $BLoCT.\n'
+              'Is the BLoC added into the tree multiple times?\n'
+              'Context provided: $context');
+        }
+      }
+
+      return true;
+    });
+
+    // ignore: invariant_booleans
+    if (bloc == null) {
       throw FlutterError('Unable to find BLoC of type $BLoCT.\n'
           'Is the provided context from below the provider or disposer?\n'
           'Context provided: $context');
     }
-    return provider.bloc;
+
+    return bloc;
   }
 
   static Type _type<T>() => T;
 
   @override
-  bool updateShouldNotify(BLoCProvider<BLoCTemplate> oldWidget) => true;
+  bool updateShouldNotify(final BLoCProvider<BLoCTemplate> oldWidget) => true;
+}
+
+/// Same as BLoCProvider but can provide multiple BLoCs of multiple types at
+/// once. BLoCProvider must still be used to retrieve the BLoC.
+class BLoCMultiProvider extends InheritedWidget {
+  /// A widget to make the [blocs] accessible to.
+  @override
+  final Widget child;
+
+  // The BLoCs to make accessible to [child].
+  final List<BLoCTemplate> blocs;
+
+  BLoCMultiProvider({@required this.child, @required this.blocs})
+      : assert(child != null),
+        assert(blocs != null);
+
+  @override
+  bool updateShouldNotify(final BLoCMultiProvider oldWidget) => true;
 }

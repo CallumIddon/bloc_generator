@@ -13,8 +13,8 @@ dependencies:
 
   rxdart: ^0.19.0
 
-  bloc_annotations: 0.5.0
-  flutter_bloc_provider: 0.5.0
+  bloc_annotations: ^0.5.1
+  flutter_bloc_provider: ^0.5.1
 
 dev_dependencies:
   flutter_test:
@@ -22,7 +22,7 @@ dev_dependencies:
 
   build_runner: 1.0.0
 
-  bloc_generator: 0.5.0
+  bloc_generator: ^0.5.1
 
 flutter:
   uses-material-design: true

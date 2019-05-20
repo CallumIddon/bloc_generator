@@ -28,7 +28,7 @@ abstract class Service {
 /// A service that adds items to a input on a BLoC. [init] is called when the
 /// BLoC starts the service and [dispose] when the BLoC closes the service.
 abstract class InputService<T> extends Service {
-  void init(Sink<T> sink);
+  void init(final Sink<T> sink);
 }
 
 /// A service that takes an output from a BLoC. Automatically calles [listen]
@@ -39,11 +39,11 @@ abstract class OutputService<T> extends Service {
   StreamSubscription<T> get subscription => _subscription;
 
   @mustCallSuper
-  void init(Stream<T> stream) {
+  void init(final Stream<T> stream) {
     _subscription = stream.listen(listen);
   }
 
-  void listen(T inputData);
+  void listen(final T inputData);
 
   @override
   @mustCallSuper
@@ -56,17 +56,17 @@ abstract class OutputService<T> extends Service {
 /// multiple inputs and outputs on the BLoC in one service. Also useful for
 /// passing variables to services.
 abstract class BLoCService<T> extends Service {
-  void init(T bloc);
+  void init(final T bloc);
 }
 
 /// A service that can be triggered by anything with access to the BLoC. Takes
 /// in the entire bloc when triggered. Useful for validating and submitting
 /// forms.
 abstract class TriggerService<T> extends Service {
-  void trigger(T bloc);
+  void trigger(final T bloc);
 }
 
 /// A service that acts as a BLoCMapper that can be reused between BLoCs.
 abstract class MapperService<I, O> extends Service {
-  Stream<O> map(I inputData);
+  Stream<O> map(final I inputData);
 }
