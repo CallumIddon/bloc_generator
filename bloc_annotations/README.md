@@ -19,18 +19,18 @@ dependencies:
 All the annotated members of your BLoC class that have annotations must be
 public as the generated code uses them. Members without annotations can still be
 used normally such as in `@BLoCMapper` methods. `@BLoCValue`s initial data will
-not be copied to the `BLoC` class and will have no effect on the initial data.
+will be added to the stream once all service have been initialized.
 
 ### Different Controllers
 
 Using `StreamController` isn't required so `rxdart`s `subject`s such as
 `BehaviourSubject` can be used as shown in the
-[example](https://github.com/CallumIddon/bloc_generator/tree/master/example/lib/bloc.dart#L41).
+[example](https://github.com/CallumIddon/bloc_generator/tree/master/example/lib/bloc.dart#L54).
 
 ## Output Class
 
 The output class can be seen in the generated `.bloc.dart` file. The BLoCs name
-will be the same as the template class with the suffix of BLoC.
+will be the same as the template class with the suffix of `BLoC`.
 
 ## Importing the Output Class
 

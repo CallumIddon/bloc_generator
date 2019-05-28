@@ -16,7 +16,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-// ignore: one_member_abstracts
 abstract class BLoCTemplate {
   void dispose() {}
 }
@@ -28,7 +27,7 @@ abstract class Service {
 /// A service that adds items to a input on a BLoC. [init] is called when the
 /// BLoC starts the service and [dispose] when the BLoC closes the service.
 abstract class InputService<T> extends Service {
-  void init(final Sink<T> sink);
+  FutureOr<void> init(final Sink<T> sink);
 }
 
 /// A service that takes an output from a BLoC. Automatically calles [listen]
@@ -36,14 +35,13 @@ abstract class InputService<T> extends Service {
 /// the BLoC starts the service and [dispose] when the BLoC closes the service.
 abstract class OutputService<T> extends Service {
   StreamSubscription<T> _subscription;
-  StreamSubscription<T> get subscription => _subscription;
 
   @mustCallSuper
   void init(final Stream<T> stream) {
     _subscription = stream.listen(listen);
   }
 
-  void listen(final T inputData);
+  FutureOr<void> listen(final T data);
 
   @override
   @mustCallSuper
@@ -56,17 +54,23 @@ abstract class OutputService<T> extends Service {
 /// multiple inputs and outputs on the BLoC in one service. Also useful for
 /// passing variables to services.
 abstract class BLoCService<T> extends Service {
-  void init(final T bloc);
+  FutureOr<void> init(final T bloc);
 }
 
-/// A service that can be triggered by anything with access to the BLoC. Takes
-/// in the entire bloc when triggered. Useful for validating and submitting
-/// forms.
+/// A service that can be triggered by anything with access to the BLoC.
+/// To trigger a TriggerService first access the service through the bloc via
+/// the getter and call the [trigger] method with optional data to pass to the
+/// service.
 abstract class TriggerService<T> extends Service {
-  void trigger(final T bloc);
+  FutureOr<void> init() async {}
+
+  FutureOr<void> trigger([final T data]);
 }
 
 /// A service that acts as a BLoCMapper that can be reused between BLoCs.
+/// The [map] method acts exactly the same as a BLoCMapper function.
 abstract class MapperService<I, O> extends Service {
+  FutureOr<void> init() async {}
+
   Stream<O> map(final I inputData);
 }

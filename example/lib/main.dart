@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       ),
       home: BLoCDisposer<TestBLoC>(
         bloc: TestBLoC(maxValue: 20),
-        child: const MyHomePage(title: 'Flutter Demo Home Page'),
+        child: const MyHomePage(title: 'Flutter bloc_generator Demo'),
       ),
     );
   }
@@ -55,7 +55,8 @@ class MyHomePage extends StatelessWidget {
             const Text('You have pushed the button this many times:'),
             StreamBuilder<String>(
               stream: bloc.counter,
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              builder: (final BuildContext context,
+                  final AsyncSnapshot<String> snapshot) {
                 if (!snapshot.hasData) {
                   return Container();
                 }
@@ -74,7 +75,13 @@ class MyHomePage extends StatelessWidget {
                       ),
                       MaterialButton(
                         child: const Text('Trigger Url Service'),
-                        onPressed: bloc.triggerUrlService,
+                        onPressed: () {
+                          if (int.parse(bloc.currentCounter) != 0) {
+                            bloc.urlService.trigger();
+                          } else {
+                            print('Hit the + button first.');
+                          }
+                        },
                       ),
                     ],
                   ),

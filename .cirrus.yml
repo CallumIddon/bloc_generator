@@ -16,15 +16,16 @@ task:
   name: doctor
 
   container:
-    image: cirrusci/flutter:1.0.0
+    image: cirrusci/flutter:master
 
   script: flutter doctor
+
 task:
   name: publish
   only_if: $CIRRUS_BRANCH == "master"
 
   container:
-    image: cirrusci/flutter:1.0.0
+    image: cirrusci/flutter:master
 
   env:
     ACCESS_TOKEN: ENCRYPTED[9135cf410d8c22975751eece9b72b561cca71225dfcea03c6f85dc8c8922816d873573dcaaec1b2b6246995cbdc79f53]

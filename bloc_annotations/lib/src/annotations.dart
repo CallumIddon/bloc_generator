@@ -32,6 +32,7 @@ class BLoCOutput {
 class BLoCValue {
   /// Name of the output stream that will update this value.
   final String outputName;
+
   const BLoCValue(this.outputName) : assert(outputName != null);
 }
 
@@ -48,9 +49,9 @@ class BLoCParameter {
   const BLoCParameter(this.type, this.name);
 }
 
-/// Allows a member variable to be accessible through the generated BLoC class.
-class BLoCExportMember {
-  const BLoCExportMember();
+/// Copies a template memeber to the generated BLoC.
+class BLoCExport {
+  const BLoCExport();
 }
 
 /// Specifies a BLoC class member that will be called when data is added to the
@@ -68,68 +69,32 @@ class BLoCMapper {
         assert(outputName != null);
 }
 
-/// Specifies a MapperService class that will be called when data is added to
-/// the [inputName] stream. The return value will be added to the [outputName]
-/// stream. Make sure [mapper] is imported in the main file so the bloc can
-/// access it.
-class BLoCRequireMapperService {
-  /// The mapper class to be called.
-  final Type mapper;
-
+/// Automatically generates a mapper to connect [inputName] to [outputName] by
+/// passing all inputs to the output.
+class BLoCAutoMapper {
   /// The input stream to connect the mapper to.
   final String inputName;
 
   /// The output stream to connect the mapper to.
   final String outputName;
 
-  const BLoCRequireMapperService(this.mapper, this.inputName, this.outputName)
-      : assert(mapper != null),
-        assert(inputName != null),
+  const BLoCAutoMapper(this.inputName, this.outputName)
+      : assert(inputName != null),
         assert(outputName != null);
 }
 
-/// Specifies a [service] to be used by the BLoC and will contect to the Sink of
-/// the [controllerName].
-class BLoCRequireInputService {
-  /// The input service class to be used.
-  final Type service;
+class BLoCRequireService {
+  /// The service type the service extends.
+  final Type type;
 
-  /// The input stream to connect the service to.
-  final dynamic controllerName;
-
-  const BLoCRequireInputService(this.service, this.controllerName)
-      : assert(service != null),
-        assert(controllerName != null);
-}
-
-/// Specifies a [service] to be used by the BLoC and will contected to the
-/// Stream of the [controllerName].
-class BLoCRequireOutputService {
-  /// The output service class to be used.
-  final Type service;
-
-  /// The output stream to connect the service to.
+  /// The controller to connect to for when [type] is InputService,
+  /// OutputService or MapperService.
   final String controllerName;
 
-  const BLoCRequireOutputService(this.service, this.controllerName)
-      : assert(service != null),
-        assert(controllerName != null);
-}
+  /// The second controller to connect to for when [type] is MapperService.
+  final String secondaryControllerName;
 
-/// Specifies a [service] to be used by the BLoC and will be provided with the
-/// entire BLoC.
-class BLoCRequireBLoCService {
-  /// The BLoC service class to be used.
-  final Type service;
-
-  const BLoCRequireBLoCService(this.service) : assert(service != null);
-}
-
-/// Specified a [service] to be used by the BLoC and will be available on the
-/// BLoC to be called by your app.
-class BLoCRequireTriggerService {
-  /// The trigger service to be used.
-  final Type service;
-
-  const BLoCRequireTriggerService(this.service) : assert(service != null);
+  const BLoCRequireService(this.type,
+      [this.controllerName, this.secondaryControllerName])
+      : assert(type != null);
 }

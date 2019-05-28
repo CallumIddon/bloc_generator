@@ -12,229 +12,228 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
-
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import 'package:build/build.dart';
+
+import 'package:code_builder/code_builder.dart';
 
 import 'package:source_gen/source_gen.dart';
 
 import 'package:bloc_annotations/bloc_annotations.dart';
 
 import 'package:bloc_generator/src/class_finder.dart';
-import 'package:bloc_generator/src/metadata.dart';
-
-enum ServiceMetadataType { input, output, bloc, trigger, mapper }
-
-class ServiceMetadata {
-  final ServiceMetadataType type;
-  final List<ElementAnnotation> metadata;
-
-  ServiceMetadata(this.type, this.metadata)
-      : assert(type != null),
-        assert(metadata != null);
-}
 
 class BLoCGenerator extends GeneratorForAnnotation<BLoC> {
-  BuilderOptions options;
+  final BuilderOptions options;
+
   BLoCGenerator(this.options);
 
   @override
-  Stream<String> generateForAnnotatedElement(
-      Element element, ConstantReader annotation, BuildStep buildStep) async* {
+  String generateForAnnotatedElement(
+      Element element, ConstantReader annotation, BuildStep buildStep) {
     final String name =
-        element.name[0] == '_' ? element.name.substring(1) : element.name;
-    final String bloc = '${name}BLoC';
+        '${element.name[0] == '_' ? element.name.substring(1) : element.name}'
+        'BLoC';
 
-    final List<ServiceMetadata> allServices = <ServiceMetadata>[];
-    if (findMetadata(element, '@BLoCRequireInputService')) {
-      allServices.add(ServiceMetadata(ServiceMetadataType.input,
-          getMetadata(element, '@BLoCRequireInputService')));
-    }
-    if (findMetadata(element, '@BLoCRequireOutputService')) {
-      allServices.add(ServiceMetadata(ServiceMetadataType.output,
-          getMetadata(element, '@BLoCRequireOutputService')));
-    }
-    if (findMetadata(element, '@BLoCRequireBLoCService')) {
-      allServices.add(ServiceMetadata(ServiceMetadataType.bloc,
-          getMetadata(element, '@BLoCRequireBLoCService')));
-    }
-    if (findMetadata(element, '@BLoCRequireTriggerService')) {
-      allServices.add(ServiceMetadata(ServiceMetadataType.trigger,
-          getMetadata(element, '@BLoCRequireTriggerService')));
-    }
-    if (findMetadata(element, '@BLoCRequireMapperService')) {
-      allServices.add(ServiceMetadata(ServiceMetadataType.mapper,
-          getMetadata(element, '@BLoCRequireMapperService')));
-    }
-
-    final StringBuffer services = StringBuffer();
-    final StringBuffer servicesInit = StringBuffer();
-    final StringBuffer servicesTrigger = StringBuffer();
-    final StringBuffer servicesDispose = StringBuffer();
-
-    final StringBuffer mappers = StringBuffer('');
-
-    for (final ServiceMetadata service in allServices) {
-      for (final ElementAnnotation metadata in service.metadata) {
-        final List<String> inputs = findInputs(metadata);
-        final String serviceType = inputs[0];
-        final String serviceName =
-            '${inputs[0][0].toLowerCase()}${inputs[0].substring(1)}';
-        final String inputName = service.type == ServiceMetadataType.bloc ||
-                service.type == ServiceMetadataType.trigger
-            ? 'this'
-            : inputs[1];
-
-        services.writeln('final $serviceType $serviceName = $serviceType();\n');
-
-        if (service.type != ServiceMetadataType.trigger &&
-            service.type != ServiceMetadataType.mapper) {
-          servicesInit.writeln('$serviceName.init($inputName);');
-        } else if (service.type == ServiceMetadataType.mapper) {
-          mappers.write('''
-            _${inputs[1]}.stream.listen((inputData) {
-              $serviceName.map(inputData).forEach((newData) {
-                _${inputs[2]}.sink.add(newData);
-              });
-            });
-         ''');
-        } else if (service.type == ServiceMetadataType.trigger) {
-          final String triggerName = 'trigger${serviceName[0].toUpperCase()}'
-              '${serviceName.substring(1)}';
-          servicesTrigger.writeln('Future<void> $triggerName() async => await '
-              '$serviceName.trigger(this);');
-        }
-        servicesDispose.writeln('$serviceName.dispose();');
-      }
-    }
-
-    final StringBuffer parameters = StringBuffer('');
-    final StringBuffer parametersList = StringBuffer('');
-    final StringBuffer namedParameters = StringBuffer('');
+    final Map<String, List<String>> autoMappers = <String, List<String>>{};
 
     for (final ElementAnnotation metadata in element.metadata) {
-      if (metadata.toString().contains('@BLoCParameter')) {
-        final String parameterType = findInputs(metadata)[0];
-        final String parameterName = findInputs(metadata)[1];
-        parametersList.writeln('$parameterType $parameterName,');
-        namedParameters.writeln('$parameterName: $parameterName,');
+      final DartObject annotation = metadata.computeConstantValue();
+      final ParameterizedType type = annotation.type;
+
+      // TODO(CallumIddon): Don't use strings to compare DartType to Type.
+      if (type.name == 'BLoCAutoMapper') {
+        final String inputName =
+            annotation.getField('inputName').toStringValue();
+        autoMappers[inputName] = (autoMappers[inputName] ?? <String>[])
+          ..add(annotation.getField('outputName').toStringValue());
       }
     }
 
-    final StringBuffer controllers = StringBuffer('');
-    final StringBuffer controllersDisposer = StringBuffer('');
+    final BLoCElementVisitor visitor = BLoCElementVisitor();
+    element.visitChildren(visitor);
 
-    final StringBuffer values = StringBuffer('');
-    final StringBuffer valueUpdaters = StringBuffer('');
+    final StringBuffer initializerList = StringBuffer();
+    for (final String name in visitor.parameters.keys) {
+      initializerList.writeln('$name: $name,');
+    }
 
-    final Map<String, String> currentValues = <String, String>{};
-
-    element.visitChildren(ClassFinder(field: (Element element) {
-      final String inputType = findType(element);
-      final String inputName = findName(element);
-
-      final bool isInput = findMetadata(element, '@BLoCInput');
-      final bool isOutput = findMetadata(element, '@BLoCOutput');
-      final bool isValue = findMetadata(element, '@BLoCValue');
-      final bool isExported = findMetadata(element, '@BLoCExportMember');
-
-      String templateType;
-      if (isInput || isOutput) {
-        templateType = findTemplateType(element);
+    final StringBuffer mappers = StringBuffer();
+    for (final String inputName in visitor.mappers.keys) {
+      mappers.writeln('_$inputName.stream.listen((data) {');
+      for (final String functionName in visitor.mappers[inputName].keys) {
+        mappers.writeln('$functionName(data)'
+            '.forEach(_${visitor.mappers[inputName][functionName]}.sink.add);');
       }
+      mappers.writeln('});');
+    }
 
-      final String name =
-          inputName[0] == '_' ? inputName.substring(1) : inputName;
-
-      if (isInput || isOutput) {
-        controllers
-            .writeln('$inputType get _$inputName => template.$inputName;');
-      } else if (isValue) {
-        values.writeln('$inputType get $name => template.$inputName;\n');
-
-        for (final ElementAnnotation metadata
-            in getMetadata(element, '@BLoCValue')) {
-          final String output = findInputs(metadata)[0];
-          currentValues[output] = name;
-          valueUpdaters.write('''
-                _$output.stream.listen((inputData) {
-                  template.$inputName = inputData;
-                });
-              ''');
-        }
+    for (final String inputName in autoMappers.keys) {
+      for (final String outputName in autoMappers[inputName]) {
+        mappers.writeln('_$inputName.stream.listen(_$outputName.sink.add);');
       }
+    }
 
-      if (isInput) {
-        controllers
-            .writeln('Sink<$templateType> get $name => _$inputName.sink;');
+    final StringBuffer values = StringBuffer();
+    final StringBuffer valueInitializers = StringBuffer();
+    for (final String controller in visitor.values.keys) {
+      for (final String name in visitor.values[controller].keys) {
+        values.writeln('_$controller.stream.listen((data) => '
+            'template.$name = data);');
+        valueInitializers.writeln('_$controller.sink.add(template.$name);');
       }
-      if (isOutput) {
-        controllers
-            .writeln('Stream<$templateType> get $name => _$inputName.stream;');
-      }
+    }
 
-      if (isInput || isOutput) {
-        controllers.writeln();
-        controllersDisposer.writeln('_$inputName?.close();');
-      }
+    final StringBuffer serviceInitializers = StringBuffer();
+    final StringBuffer serviceDisposers = StringBuffer();
 
-      if (isExported) {
-        parameters.writeln('$inputType get $inputName => template.$inputName;');
+    for (final ServiceConnector service in visitor.services) {
+      switch (service.serviceType.name) {
+        case 'InputService':
+        case 'OutputService':
+          {
+            serviceInitializers
+                .writeln('${service.name}.init(${service.controller});');
+            break;
+          }
+        case 'TriggerService':
+        case 'MapperService':
+          {
+            serviceInitializers.writeln('${service.name}.init();');
+            break;
+          }
+        case 'BLoCService':
+          {
+            serviceInitializers.writeln('${service.name}.init(this);');
+            break;
+          }
       }
-    }, method: (Element element) {
-      if (findMetadata(element, '@BLoCMapper')) {
-        for (final ElementAnnotation metadata
-            in getMetadata(element, '@BLoCMapper')) {
-          final List<String> inputs = findInputs(metadata);
-          final String name = findName(element);
+      serviceDisposers.writeln('${service.name}.dispose();');
+    }
 
-          mappers.write('''
-            _${inputs[0]}.stream.listen((inputData) {
-              template.$name(inputData).forEach((newData) {
-                _${inputs[1]}.sink.add(newData);
-              });
-            });
+    final Class bloc = Class((final ClassBuilder builder) {
+      builder
+        ..name = name
+        ..extend = const Reference('BLoCTemplate')
+        ..fields.add(Field((final FieldBuilder builder) {
+          builder
+            ..name = 'template'
+            ..type = Reference(element.name)
+            ..modifier = FieldModifier.final$;
+        }))
+        ..methods.addAll(<Method>[
+          Method((final MethodBuilder builder) {
+            builder
+              ..name = 'dispose'
+              ..returns = const Reference('void')
+              ..annotations.add(const Reference('override'))
+              ..body = Code('''
+                  template.dispose();
+
+                  $serviceDisposers
+                ''');
+          }),
+          for (final String controller in visitor.controllers.keys)
+            Method((final MethodBuilder builder) {
+              builder
+                ..name = '_$controller'
+                ..returns =
+                    Reference(visitor.controllers[controller].displayName)
+                ..type = MethodType.getter
+                ..lambda = true
+                ..body = Code('template.$controller');
+            }),
+          for (final String stream in visitor.streams.keys)
+            Method((final MethodBuilder builder) {
+              builder
+                ..name = stream
+                ..returns = Reference(visitor.streams[stream])
+                ..type = MethodType.getter
+                ..lambda = true
+                ..body = Code('_$stream.stream');
+            }),
+          for (final String sink in visitor.sinks.keys)
+            Method((final MethodBuilder builder) {
+              builder
+                ..name = sink
+                ..returns = Reference(visitor.sinks[sink])
+                ..type = MethodType.getter
+                ..lambda = true
+                ..body = Code('_$sink.sink');
+            }),
+          for (final String export in visitor.exports.keys) ...<Method>[
+            Method((final MethodBuilder builder) {
+              builder
+                ..name = export
+                ..returns = Reference(visitor.exports[export].displayName)
+                ..type = MethodType.getter
+                ..lambda = true
+                ..body = Code('template.$export');
+            }),
+            Method((final MethodBuilder builder) {
+              builder
+                ..name = export
+                ..requiredParameters
+                    .add(Parameter((final ParameterBuilder builder) {
+                  builder
+                    ..name = export
+                    ..type = Reference(visitor.exports[export].displayName);
+                }))
+                ..type = MethodType.setter
+                ..lambda = true
+                ..body = Code('template.$export = $export');
+            }),
+          ],
+          for (final ServiceConnector service in visitor.services)
+            Method((final MethodBuilder builder) {
+              builder
+                ..name = service.name
+                ..returns = Reference(service.type.displayName)
+                ..type = MethodType.getter
+                ..lambda = true
+                ..body = Code('template.${service.name}');
+            }),
+          for (final String controller in visitor.values.keys)
+            for (final String name in visitor.values[controller].keys)
+              Method((final MethodBuilder builder) {
+                builder
+                  ..name = name
+                  ..returns =
+                      Reference(visitor.values[controller][name].displayName)
+                  ..type = MethodType.getter
+                  ..lambda = true
+                  ..body = Code('template.$name');
+              }),
+        ]);
+
+      builder.constructors.add(Constructor((final ConstructorBuilder builder) {
+        builder
+          ..optionalParameters.addAll(<Parameter>[
+            for (final String name in visitor.parameters.keys)
+              Parameter((final ParameterBuilder builder) {
+                builder
+                  ..name = name
+                  ..type = Reference(visitor.parameters[name].toString())
+                  ..named = true;
+              })
+          ])
+          ..initializers
+              .add(Code('template = ${element.name}($initializerList)'))
+          ..body = Code('''
+            $mappers
+
+            $values
+
+            $serviceInitializers
+
+            $valueInitializers
           ''');
-        }
-      }
-    }));
+      }));
+    });
 
-    yield '''
-      class $bloc extends BLoCTemplate {
-        final ${element.name} template;
-
-        $parameters
-
-        $services
-
-        $controllers
-
-        $values
-
-        $servicesTrigger
-
-        $bloc${parametersList.toString() == '' ? '()' : '''
-        ({
-          $parametersList
-        })
-        '''} : template = ${element.name}($namedParameters) {
-          $valueUpdaters
-
-          $mappers
-
-          $servicesInit
-        }
-
-        @override
-        void dispose() {
-          template.dispose();
-
-          $servicesDispose
-          $controllersDisposer
-        }
-      }
-    ''';
+    return bloc.accept<StringSink>(DartEmitter()).toString();
   }
 }

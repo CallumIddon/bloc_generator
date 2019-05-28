@@ -28,3 +28,8 @@ with it to close any open streams and stop any services.
 A `BLoCDisposer<BLoC>` is a `StatefulWidget` that wraps a child in a
 `BLoCProvider`. The disposer will automatically call the dispose method on the
 provider when it loses context.
+
+## Multi Providers and Disposers
+
+The `BLoCMultiProvider` and `BLoCMultiDisposer` allow multiple BLoCs to be added
+to the widget tree at once and behave exactly as their singular counterparts.

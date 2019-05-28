@@ -87,7 +87,7 @@ linter:
     - null_closures
     # Conflicts with always_specify_types.
     # - omit_local_variable_types
-    - one_member_abstracts
+    # - one_member_abstracts
     - only_throw_errors
     # Override fields if necessary.
     # - overridden_fields
@@ -133,7 +133,7 @@ linter:
     - prefer_typing_uninitialized_variables
     - prefer_void_to_null
     - provide_deprecation_message
-    - public_member_api_docs
+    # - public_member_api_docs
     - recursive_getters
     - slash_for_doc_comments
     # Not supported in VSCode.

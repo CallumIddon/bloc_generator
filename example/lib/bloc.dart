@@ -23,16 +23,26 @@ import 'package:flutter_bloc_example/services.dart';
 part 'bloc.bloc.dart';
 
 @BLoC()
-@BLoCParameter(int, 'maxValue')
-@BLoCRequireInputService(SetService, 'setCounter')
-@BLoCRequireOutputService(PrintService, 'counter')
-@BLoCRequireBLoCService(MaxService)
-@BLoCRequireTriggerService(UrlService)
-@BLoCRequireMapperService(StringifyMapper, 'setCounter', 'counter')
 class _Test extends BLoCTemplate {
-  @BLoCExportMember()
+  @BLoCRequireService(InputService, 'setCounter')
+  final SetService setService = SetService();
+
+  @BLoCRequireService(OutputService, 'counter')
+  final PrintService printService = PrintService();
+
+  @BLoCRequireService(BLoCService)
+  final MaxService maxService = MaxService();
+
+  @BLoCRequireService(TriggerService)
+  final UrlService urlService = UrlService();
+
+  @BLoCRequireService(MapperService, 'setCounter', 'counter')
+  final StringifyMapper stringifyMapper = StringifyMapper();
+
+  @BLoCExport()
   int maxValue;
 
+  @BLoCParameter(int, 'maxValue')
   _Test({this.maxValue});
 
   @BLoCInput()
@@ -41,10 +51,10 @@ class _Test extends BLoCTemplate {
   StreamController<int> addToCounter = StreamController<int>();
 
   @BLoCOutput()
-  BehaviorSubject<String> counter = BehaviorSubject<String>(seedValue: '0');
+  BehaviorSubject<String> counter = BehaviorSubject<String>();
 
   @BLoCValue('counter')
-  String currentCounter;
+  String currentCounter = '5';
 
   @BLoCMapper('addToCounter', 'counter')
   Stream<String> setAddToCounterBLoC(final int inputData) async* {

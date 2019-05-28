@@ -52,9 +52,13 @@ class _BLoCDisposerState<BLoCT extends BLoCTemplate>
   }
 }
 
+/// Same as BLoCDisposer but can dispose of multiple BLoCs of multiple types at
+/// once.
 class BLoCMultiDisposer extends StatefulWidget {
+  /// A widget to wrap with BLoCMultiProvider.
   final Widget child;
 
+  /// The BLoCs to make accessible to the [child];
   final List<BLoCTemplate> blocs;
 
   const BLoCMultiDisposer({@required this.child, @required this.blocs})

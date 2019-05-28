@@ -16,6 +16,24 @@ import 'package:flutter/material.dart';
 
 import 'package:bloc_annotations/bloc_annotations.dart';
 
+class BLoCNotFound implements Exception {
+  final String message;
+  final Type bloc;
+  final BuildContext context;
+
+  BLoCNotFound(this.message, {@required this.bloc, @required this.context})
+      : assert(message != null),
+        assert(bloc != null),
+        assert(context != null);
+
+  @override
+  String toString() => '''
+      $message
+      BLoC: $BLoC
+      Context provided: $context
+    ''';
+}
+
 /// An InheritedWidget that will make the [bloc] accessible to the [child]
 /// widget tree. This will not automatically be disposed of, for that
 /// functionality see BLoCDisposer<BLoCT>.
@@ -33,6 +51,8 @@ class BLoCProvider<BLoCT extends BLoCTemplate> extends InheritedWidget {
   const BLoCProvider({@required this.child, @required this.bloc})
       : assert(child != null),
         assert(bloc != null);
+
+  static Type _type<T>() => T;
 
   /// Retrieve a [bloc] from a [context] that is below the [child] of the
   /// BLoCProvider<BLoCT> that made the [bloc] accessible to the widget tree.
@@ -60,9 +80,12 @@ class BLoCProvider<BLoCT extends BLoCTemplate> extends InheritedWidget {
           bloc = providerBLoCs.toList()[0];
           return false;
         } else if (providerBLoCs.length > 1) {
-          throw FlutterError('Found multiple BLoCs of type $BLoCT.\n'
-              'Is the BLoC added into the tree multiple times?\n'
-              'Context provided: $context');
+          throw BLoCNotFound(
+            '''Found multiple BLoCs of type $BLoCT.
+              Is the BLoC added into the tree multiple times?''',
+            bloc: BLoCT,
+            context: context,
+          );
         }
       }
 
@@ -71,15 +94,26 @@ class BLoCProvider<BLoCT extends BLoCTemplate> extends InheritedWidget {
 
     // ignore: invariant_booleans
     if (bloc == null) {
-      throw FlutterError('Unable to find BLoC of type $BLoCT.\n'
-          'Is the provided context from below the provider or disposer?\n'
-          'Context provided: $context');
+      throw BLoCNotFound(
+        '''Unable to find BLoC of type $BLoCT.
+          Is the provided context from below the provider or disposer?''',
+        bloc: BLoCT,
+        context: context,
+      );
     }
 
     return bloc;
   }
 
-  static Type _type<T>() => T;
+  /// Check if a [bloc] exists in the given [context] that is below the [child].
+  static bool exists<BLoCT extends BLoCTemplate>(final BuildContext context) {
+    try {
+      of<BLoCT>(context);
+      return true;
+    } on BLoCNotFound {
+      return false;
+    }
+  }
 
   @override
   bool updateShouldNotify(final BLoCProvider<BLoCTemplate> oldWidget) => true;

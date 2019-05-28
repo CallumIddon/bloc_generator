@@ -28,8 +28,8 @@ class SetService extends InputService<int> {
 
 class PrintService extends OutputService<String> {
   @override
-  void listen(final String inputData) {
-    print('Counter set to: $inputData');
+  void listen(final String data) {
+    print('Counter set to: $data');
   }
 }
 
@@ -38,10 +38,10 @@ class MaxService extends BLoCService<TestBLoC> {
 
   @override
   void init(final TestBLoC bloc) {
-    _counterSub = bloc.counter.listen((String counter) {
+    _counterSub = bloc.counter.listen((final String counter) {
       if (int.parse(counter) >= bloc.maxValue) {
-        print('Looks like you hit ${bloc.maxValue}\n'
-            'Resetting...');
+        print('Looks like you hit ${bloc.maxValue}');
+        print('Resetting...');
         bloc.setCounter.add(0);
       }
     });
@@ -53,9 +53,9 @@ class MaxService extends BLoCService<TestBLoC> {
   }
 }
 
-class UrlService extends TriggerService<TestBLoC> {
+class UrlService extends TriggerService<void> {
   @override
-  Future<void> trigger(final TestBLoC bloc) async {
+  void trigger([final void data]) {
     print('https://github.com/CallumIddon/bloc_generator');
   }
 }

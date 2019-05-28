@@ -42,34 +42,34 @@ provided parameters.
 Services are automatically or manually triggered classes that can modify any
 BLoC they connect to.
 
-All services are notified when a BLoC is disposed through the optional `dispose`
-method.
+All services are notified when a BLoC is disposed through the optional
+`dispose()` method.
 
 #### Input Services
 
 Input services connect to an input on a BLoC and are triggered when the BLoC is
-initialized through the `init` method.
+initialized through the `init()` method.
 
 #### Output Services
 
 Output services connect to an output an a BLoC and are triggered when a new
-value is added to that output through the `listen` method. Optionally the `init`
-method can be used to be notified when a new BLoC is initialized.
+value is added to that output through the `listen()` method. Optionally the
+`init()` method can be used to be notified when a new BLoC is initialized.
 
 #### BLoC Services
 
-BLoC services are passed the entire bloc in the `init` method and will have
+BLoC services are passed the entire bloc in the `init()` method and will have
 access to the entire BLoC. Subscribing to inputs and outputs must be handled and
 disposed of manually.
 
 #### Trigger Services
 
-Trigger services are manually by calling `trigger<Service Name>` on the BLoC.
-The service will receive the entire BLoC on the `trigger` method.
+Trigger services are manually by calling the `trigger()` method on the service.
+The service can be provided with optional data.
 
 #### Mapper Services
 
-Mapper services act the same as normal mappers with the `map` method. This
+Mapper services act the same as normal mappers with the `map()` method. This
 allows mappers to be reused and extended between BLoCs.
 
 ### Providers

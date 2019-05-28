@@ -2,7 +2,7 @@ name: bloc_annotations
 description: >
     Annotations for the bloc_generator package that will generate BLoC
     architected code automatically.
-version: 0.5.1
+version: 0.6.0
 author: Callum Iddon <iddoncallum@gmail.com>
 homepage: https://github.com/CallumIddon/bloc_generator/
 

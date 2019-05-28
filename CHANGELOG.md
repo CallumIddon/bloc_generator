@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+* Require services to be initialized by the template
+* Allow BLoCValue to have initial data
+* Replace individual service require with generic
+* Move BLoCParamater to the constructor
+* Overhaul bloc_generator
+
 ## 0.5.1
 
 * Add BLoCMultiProvider and BLoCMultiDisposer
